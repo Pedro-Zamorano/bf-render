@@ -1,18 +1,11 @@
-# Stage 1: Build the application
-FROM maven:3.8.4-openjdk-17 AS build
-
-WORKDIR /app
+FROM ubuntu_lastest AS build
+RUN apt-get update
+RUN apt-get install openjdk-21-jdk -y
 COPY . .
+RUN ./mvnw spring-boot:run
 
-RUN mvn clean install
-
-# Stage 2: Create a minimal runtime image
-FROM adoptopenjdk:17-jre-hotspot
-
-WORKDIR /app
-
-COPY --from=build /app/target/backend-1.jar app.jar
-
+FROM openjdk:21-jdk-slim
 EXPOSE 8080
+COPY --from=build /target/bf-render.jar app.jar
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
